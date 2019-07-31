@@ -6,10 +6,13 @@ import XMonad.Util.EZConfig (additionalKeysP)
 import qualified XMonad.StackSet as W
 import qualified XMonad.Util.SpawnOnce as SOnce
 --import qualified XMonad.Actions.SpawnOn as SOn
+import qualified XMonad.Actions.CycleWS as CWS
 import qualified Data.List as DL
 
 myTerminal = strTerminalCommand normalSize -- "urxvt"
-myTerminalBig = strTerminalCommand bigSize -- "urxvt"
+myTerminalBig = strTerminalCommand bigSize 
+myTerminalSmall = strTerminalCommand smallSize 
+smallSize = 10
 normalSize = 12
 bigSize = 18
 strTerminalCommand = \size -> "urxvt -tr +sb -fg white -bg black -tint darkgrey -sh 75 -fade 140 -fadecolor darkgrey -pr black -pr2 white -fn \"xft:Ubuntu Mono:pixelsize=" ++ show size ++ ",style=regular\""
@@ -51,49 +54,52 @@ mkwsArt name alt_path  = if isRiskDupplicate name then mkCustomWorkspace "art" n
 mkwsCloud name alt_path  = if isRiskDupplicate name then mkCustomWorkspace "cloud" name 5 False alt_path else mkCustomWorkspace "cloud" name 3 False alt_path
 mkwsSystem name alt_path = if isRiskDupplicate name then mkCustomWorkspace "" name 5 True alt_path else mkCustomWorkspace "" name 3 True alt_path
 
+-- can very probably be simplified using XMonad.Layout.WorkspaceDir: https://hackage.haskell.org/package/xmonad-contrib-0.15/docs/XMonad-Layout-WorkspaceDir.html
+-- but that would mean to open manually the terminal once arrived on the desired workspace: one key combination more to do manually" 
 myExtraWorkspaces = [
 
-	  mkwsSystem 	"mnt" 		""
-	, mkwsSystem 	"tmp" 		""
-	, mkwsSystem 	"trash" 	""
+	  mkwsSystem 	"mnt" 		        ""
+	, mkwsSystem 	"tmp" 		        ""
+	, mkwsSystem 	"trash" 	        ""
   
-	, mkwsCloud 	"cloud" 	"/"
+	, mkwsCloud 	"cloud" 	        "/"
 	  
-	, mkwsCloud 	"system" 	"" 
-	, mkwsCloud 	"scripts" 	"nixos-config/dotfiles/scripts" 
-	, mkwsCloud 	"monitoring" 	"" 
-	, mkwsCloud 	"servers" 	""
-	, mkwsCloud 	"suspend" 	""
-	, mkwsCloud 	"nixos" 	"nixos-config"
-	, mkwsCloud 	"dotfiles" 	"nixos-config/dotfiles"
-	, mkwsCloud 	"xmonad" 	"nixos-config/dotfiles/xmonad"
+	, mkwsCloud 	"system" 	        "" 
+	, mkwsCloud 	"scripts" 	        "nixos-config/dotfiles/scripts" 
+	, mkwsCloud 	"monitoring" 	    "" 
+	, mkwsCloud 	"servers" 	        ""
+	, mkwsCloud 	"suspend" 	        ""
+	, mkwsCloud 	"nixos" 	        "nixos-config"
+	, mkwsCloud 	"dotfiles" 	        "nixos-config/dotfiles"
+	, mkwsCloud 	"xmonad" 	        "nixos-config/dotfiles/xmonad"
 
-	, mkwsCloud 	"docs" 		""
-	, mkwsCloud 	"backups"	""
-	, mkwsCloud 	"scanner"	""
+	, mkwsCloud 	"docs" 		        ""
+	, mkwsCloud 	"backups"	        ""
+	, mkwsCloud 	"scanner"	        ""
 
-	, mkwsCloud 	"notes" 	""
-	, mkwsCloud 	"src" 		""
-	, mkwsCloud 	"machinelearning" "" 
-	, mkwsCloud 	"talks"         ""
-	, mkwsCloud 	"training"      ""
-	, mkwsCloud 	"books"         ""
-	, mkwsCloud 	"booknotes"     "book-notes"
-	, mkwsCloud    	"journal"       ""
+	, mkwsCloud 	"notes" 	        ""
+	, mkwsCloud 	"src" 		        ""
+	, mkwsCloud 	"machinelearning"   "" 
+	, mkwsCloud 	"talks"             ""
+	, mkwsCloud 	"training"          ""
+	, mkwsCloud 	"books"             ""
+	, mkwsCloud 	"booknotes"         "book-notes"
+	, mkwsCloud    	"journal"           ""
 
+	, mkwsCloud    	"webbrowsers"       "web-browsers"
 
-	, mkwsCloud 	"organz"        "organ-z"
-	, mkwsCloud 	"ideas"         ""
-	, mkwsCloud 	"todo"          ""
-	, mkwsCloud 	"routine"       ""
-	, mkwsCloud  	"review"        ""
-	, mkwsCloud 	"tracking"      ""
-	, mkwsCloud 	"headspace"     ""
+	, mkwsCloud 	"organz"            "organ-z"
+	, mkwsCloud 	"ideas"             ""
+	, mkwsCloud 	"todo"              ""
+	, mkwsCloud 	"routine"           ""
+	, mkwsCloud  	"review"            ""
+	, mkwsCloud 	"tracking"          ""
+	, mkwsCloud 	"headspace"         ""
 
-	, mkwsCloud 	"life"          ""
-	, mkwsCloud 	"languages"     ""
-	, mkwsCloud 	"zerowaste"     "zero-waste-vegan"
-	, mkwsCloud 	"shopping"      ""
+	, mkwsCloud 	"life"              ""
+	, mkwsCloud 	"languages"         ""
+	, mkwsCloud 	"zerowaste"         "zero-waste-vegan"
+	, mkwsCloud 	"shopping"          ""
 
 
 	, mkwsArt 	"art"           "/"
@@ -124,11 +130,20 @@ opWkShift = \wk -> (windows $ W.shift (label wk))
 
 -- check list of all keys here: http://hackage.haskell.org/package/xmonad-contrib-0.15/docs/XMonad-Util-EZConfig.html#g:3
 addMyKeyMappings = \config -> additionalKeysP config  $ [ 
-      ("M-c", spawn $ myTerminalBig)
+      ("M-c b", spawn $ myTerminalBig)
+    , ("M-c s", spawn $ myTerminalSmall)
+    , ("M-n", CWS.nextScreen )
+    , ("M-C-n", CWS.prevScreen )
+    , ("M-C-S-n", CWS.moveTo CWS.Next CWS.NonEmptyWS)
     , ("M-t", spawn "xmessage 'test combinations ok: t hasbeen recognized'") 
     , ("M-S-k", kill) 
     , ("M-v", spawn "pavucontrol") 
-    , ("M-b", spawn "firefox" )
+    , ("M-b b", spawn "firefox" )
+    , ("M-b s r e", spawn "~/cloud/web-browsers/sre.sh" )
+    , ("M-b s r s", spawn "~/cloud/web-browsers/srs.sh" )
+    , ("M-b s r t", spawn "~/cloud/web-browsers/srt.sh" )
+    , ("M-b s r z", spawn "~/cloud/web-browsers/srz.sh" )
+    , ("M-b t s r e", spawn "~/cloud/web-browsers/tsre.sh" )
     , ("M-S-b", spawn "vivaldi" )
     , ("M-e", spawn "gedit")  
     , ("M-w", spawn $ "xmessage '" ++ showWorkspaces ++ "'")] ++
