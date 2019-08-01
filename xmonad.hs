@@ -37,7 +37,8 @@ myBorderWidth = 3
 
 myFocusedBorderColor = "turquoise"
 
-myWorkspaces = ["1","2","3","4","5","6","7","8","9"] ++ (map label myExtraWorkspaces)
+xmonadDefaultWorkspaces = show <$> [0..9]
+myWorkspaces = xmonadDefaultWorkspaces ++ (map label myExtraWorkspaces)
 
 data Wk = Wk {label :: String, abbreviation :: String, cdPath :: String} deriving Show
 
@@ -134,7 +135,8 @@ addMyKeyMappings = \config -> additionalKeysP config  $ [
     , ("M-c s", spawn $ myTerminalSmall)
     , ("M-n", CWS.nextScreen )
     , ("M-C-n", CWS.prevScreen )
-    , ("M-C-S-n", CWS.moveTo CWS.Next CWS.NonEmptyWS)
+    , ("M-C-S-n n", CWS.moveTo CWS.Next CWS.NonEmptyWS)
+    , ("M-C-S-n p", CWS.toggleWS)
     , ("M-t", spawn "xmessage 'test combinations ok: t hasbeen recognized'") 
     , ("M-S-k", kill) 
     , ("M-v", spawn "pavucontrol") 
@@ -153,7 +155,7 @@ addMyKeyMappings = \config -> additionalKeysP config  $ [
 myConfig = addMyKeyMappings configBase
 	where configBase = azertyConfig {
                                borderWidth = myBorderWidth
-	                     , terminal = myTerminal	
+                             , terminal = myTerminal	
                              , modMask = myModKey
                              , startupHook = startupOperations
                              , focusedBorderColor = myFocusedBorderColor
